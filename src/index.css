@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+@import "./responsive.css";
+
+@theme {
+  --font-sans: 'Poppins', sans-serif;
+  --color-primary: #111111;
+  --color-accent: #FFC107;
+  --color-bg-light: #F5F5F5;
+}
+
+@layer base {
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #F5F5F5;
+    color: #111111;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+::-webkit-scrollbar-thumb {
+  background: #FFC107;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e0a800;
+}
+
+/* Premium Custom Utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-dark {
+  background: rgba(17, 17, 17, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.text-stroke-accent {
+  -webkit-text-stroke: 1px #FFC107;
+  color: transparent;
+}
+
+.premium-card {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.premium-card-dark {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.premium-card-dark:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-color: #FFC107;
+}
+
+/* Hide spin-buttons for input number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}

@@ -1,0 +1,61 @@
+/* --------------------------------------------------------
+   Global Mobile Responsiveness
+   -------------------------------------------------------- */
+
+/* Ensure the viewport is set correctly (add to index.html if missing) */
+meta[name="viewport"] {
+  content: "width=device-width, initial-scale=1";
+}
+
+/* Base fluid layout */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+}
+
+/* Images scale fluidly */
+img, picture, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Flex containers become column on narrow screens */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Generic heading scaling */
+h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); }
+h2 { font-size: clamp(1.5rem, 4vw, 2rem); }
+h3 { font-size: clamp(1.3rem, 3.5vw, 1.75rem); }
+
+/* --------------------------------------------------------
+   Tablet (min‑width: 600px)
+   -------------------------------------------------------- */
+@media (min-width: 600px) {
+  .container { flex-direction: row; }
+}
+
+/* --------------------------------------------------------
+   Mobile (max‑width: 599px)
+   -------------------------------------------------------- */
+@media (max-width: 599px) {
+  /* Stack sections vertically */
+  .section { width: 100%; padding: 1rem; }
+  
+  /* Navigation – vertical list */
+  nav ul {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  /* Footer – center content */
+  footer {
+    text-align: center;
+    padding: 1rem;
+  }
+}
