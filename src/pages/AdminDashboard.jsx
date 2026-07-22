@@ -1,4 +1,4 @@
-// src/pages/AdminDashboard.jsx
+// src/pages/AdminDashboard.jsx — RKS Self Drives Admin Portal
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -263,12 +263,62 @@ export default function AdminDashboard() {
 
   // Lightbox review documents
   const handleOpenDocs = (booking) => {
+    const matchedCustomer = customers.find(c => c.uid === booking.customerUid || c.id === booking.customerUid);
     setSelectedDocs({
-      name: booking.customerName,
-      dlUrl: booking.dlUrl,
-      aadhaarUrl: booking.aadhaarUrl
+      name: booking.customerName || (matchedCustomer && (matchedCustomer.name || matchedCustomer.fullName)) || booking.fullName || booking.name || "Customer",
+      phone: booking.customerPhone || (matchedCustomer && (matchedCustomer.phone || matchedCustomer.contactNumber)) || booking.contactNumber || booking.phone || "N/A",
+      careOf: booking.careOf || "N/A",
+      referenceName: booking.referenceName || "N/A",
+      referencePhone: booking.referencePhone || "N/A",
+      address: booking.address || "N/A",
+      dob: booking.dob || "N/A",
+      carName: booking.carName || "Vehicle",
+      dlUrl: booking.dlUrl || booking.dlFile || booking.drivingLicence || booking.dl,
+      aadhaarUrl: booking.aadhaarUrl || booking.aadhaarFile || booking.aadhaar
     });
     setShowDocModal(true);
+  };
+
+  // Helper to render uploaded document (Image or PDF) with direct link
+  const renderAdminDocViewer = (url, title) => {
+    if (!url) {
+      return (
+        <div className="h-64 w-full bg-gray-100 rounded-2xl flex flex-col items-center justify-center text-gray-400 text-xs border border-gray-200">
+          <FileText className="h-8 w-8 mb-2 text-gray-300" />
+          <span>No {title} document uploaded</span>
+        </div>
+      );
+    }
+
+    const isPdf = typeof url === "string" && (url.toLowerCase().includes(".pdf") || url.startsWith("data:application/pdf"));
+
+    return (
+      <div className="flex flex-col space-y-2">
+        <div className="h-64 w-full bg-black/90 rounded-2xl overflow-hidden border border-gray-200 shadow-inner relative flex items-center justify-center">
+          {isPdf ? (
+            <iframe src={url} title={title} className="w-full h-full border-none" />
+          ) : (
+            <img
+              src={url}
+              alt={title}
+              className="h-full w-full object-contain"
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
+            />
+          )}
+        </div>
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="w-full py-2.5 rounded-xl bg-primary hover:bg-black text-accent font-bold text-xs uppercase tracking-wider text-center transition flex items-center justify-center space-x-2 cursor-pointer shadow-sm"
+        >
+          <Eye className="h-4 w-4" />
+          <span>Open Full {title} (New Tab)</span>
+        </a>
+      </div>
+    );
   };
 
   // Generate Admin summary stats
@@ -440,27 +490,36 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 font-medium text-primary">
-                    {bookings.map(booking => (
-                      <tr key={booking.id} className="hover:bg-gray-50/50">
-                        <td className="p-4">
-                          <div className="font-bold text-sm flex items-center">
-                             {booking.customerName}
-                             {booking.days > 21 && <AlertTriangle className="h-4 w-4 text-red-600 ml-2" title="Long rental (>3 weeks)" />}
-                          </div>
-                          <div className="text-[10px] text-gray-400">ID: {booking.customerUid} | {booking.customerPhone}</div>
-                        </td>
-                        <td className="p-4">
-                          <div className="font-bold">{booking.carName}</div>
-                          <div className="text-[10px] text-gray-400">₹{booking.price || 2000}/day</div>
-                        </td>
-                        <td className="p-4">
-                          <div>{booking.departureDate} at {booking.departureTime}</div>
-                          <div className="text-[10px] text-gray-400">Duration: {booking.days} Day(s)</div>
-                        </td>
-                        <td className="p-4 text-[10px] text-gray-600">
-                          <div>{booking.address}</div>
-                          <div className="mt-1 text-gray-400 italic">{booking.remarks}</div>
-                        </td>
+                    {bookings.map(booking => {
+                      const matchedCust = customers.find(c => c.uid === booking.customerUid || c.id === booking.customerUid);
+                      const displayName = booking.customerName || (matchedCust && (matchedCust.name || matchedCust.fullName)) || booking.fullName || booking.name || "Customer";
+                      const displayPhone = booking.customerPhone || (matchedCust && (matchedCust.phone || matchedCust.contactNumber)) || booking.contactNumber || booking.phone || "N/A";
+                      return (
+                        <tr key={booking.id} className="hover:bg-gray-50/50">
+                          <td className="p-4">
+                            <div className="font-bold text-sm flex items-center text-primary">
+                               {displayName}
+                               {booking.days > 21 && <AlertTriangle className="h-4 w-4 text-red-600 ml-2" title="Long rental (>3 weeks)" />}
+                            </div>
+                            <div className="text-[10px] text-gray-500 font-semibold mt-0.5">📞 {displayPhone}</div>
+                            <div className="text-[9px] text-gray-400">ID: {booking.customerUid || booking.id}</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-bold text-primary">{booking.carName}</div>
+                            <div className="text-[10px] text-gray-400">₹{booking.price || 2000}/day</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-semibold text-primary">{booking.departureDate} at {booking.departureTime}</div>
+                            <div className="text-[10px] text-gray-400">Duration: {booking.days} Day(s)</div>
+                          </td>
+                          <td className="p-4 text-[10px] text-gray-600">
+                            <div><span className="font-bold text-gray-700">Address:</span> {booking.address || "N/A"}</div>
+                            {booking.careOf && <div><span className="font-bold text-gray-700">C/O:</span> {booking.careOf}</div>}
+                            {booking.referenceName && booking.referenceName !== "N/A" && (
+                              <div><span className="font-bold text-gray-700">Ref:</span> {booking.referenceName} ({booking.referencePhone || ""})</div>
+                            )}
+                            {booking.remarks && <div className="mt-1 text-gray-400 italic">{booking.remarks}</div>}
+                          </td>
                         <td className="p-4">
                           <button 
                             onClick={() => handleOpenDocs(booking)}
@@ -520,8 +579,9 @@ export default function AdminDashboard() {
                           )}
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
+                    );
+                  })}
+                </tbody>
                 </table>
               </div>
             )}
@@ -1328,7 +1388,7 @@ export default function AdminDashboard() {
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="bg-white rounded-3xl w-full max-w-3xl p-8 border border-gray-100 shadow-2xl relative text-left"
+              className="bg-white rounded-3xl w-full max-w-4xl p-6 sm:p-8 border border-gray-100 shadow-2xl relative text-left max-h-[90vh] overflow-y-auto"
             >
               <button 
                 onClick={() => setShowDocModal(false)}
@@ -1337,29 +1397,39 @@ export default function AdminDashboard() {
                 <X className="h-5 w-5" />
               </button>
 
-              <h3 className="text-lg font-bold text-primary mb-6">Verification Documents: {selectedDocs.name}</h3>
+              {/* Header Details */}
+              <div className="border-b pb-4 mb-6">
+                <h3 className="text-xl font-extrabold text-primary">Document Verification</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-xs bg-gray-50 p-3.5 rounded-2xl border border-gray-100">
+                  <div>
+                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Customer Name</span>
+                    <span className="font-bold text-primary">{selectedDocs.name}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Phone</span>
+                    <span className="font-bold text-primary">{selectedDocs.phone}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Car</span>
+                    <span className="font-bold text-primary">{selectedDocs.carName}</span>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-bold text-gray-400 uppercase block">Care Of</span>
+                    <span className="font-bold text-primary">{selectedDocs.careOf}</span>
+                  </div>
+                </div>
+              </div>
 
+              {/* Documents Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Driving Licence (DL)</span>
-                  <div className="h-64 w-full bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-inner">
-                    {selectedDocs.dlUrl ? (
-                      <img src={selectedDocs.dlUrl} alt="DL Copy" className="h-full w-full object-contain bg-black" />
-                    ) : (
-                      <div className="h-full flex items-center justify-center text-gray-400 text-xs">No copy uploaded</div>
-                    )}
-                  </div>
+                  <span className="block text-xs font-extrabold text-primary uppercase tracking-wider mb-2.5">Driving Licence (DL)</span>
+                  {renderAdminDocViewer(selectedDocs.dlUrl, "Driving Licence")}
                 </div>
 
                 <div>
-                  <span className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Aadhaar Card</span>
-                  <div className="h-64 w-full bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-inner">
-                    {selectedDocs.aadhaarUrl ? (
-                      <img src={selectedDocs.aadhaarUrl} alt="Aadhaar Copy" className="h-full w-full object-contain bg-black" />
-                    ) : (
-                      <div className="h-full flex items-center justify-center text-gray-400 text-xs">No copy uploaded</div>
-                    )}
-                  </div>
+                  <span className="block text-xs font-extrabold text-primary uppercase tracking-wider mb-2.5">Aadhaar Card</span>
+                  {renderAdminDocViewer(selectedDocs.aadhaarUrl, "Aadhaar Card")}
                 </div>
               </div>
             </motion.div>
